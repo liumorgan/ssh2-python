@@ -735,9 +735,9 @@ static const char *__pyx_filename;
 static const char *__pyx_f[] = {
   "ssh2/session.pyx",
   "stringsource",
-  "pypy_env/site-packages/Cython/Includes/cpython/type.pxd",
-  "pypy_env/site-packages/Cython/Includes/cpython/bool.pxd",
-  "pypy_env/site-packages/Cython/Includes/cpython/complex.pxd",
+  "type.pxd",
+  "bool.pxd",
+  "complex.pxd",
   "ssh2/agent.pxd",
   "ssh2/channel.pxd",
   "ssh2/listener.pxd",

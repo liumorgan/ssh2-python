@@ -19,6 +19,33 @@ from libc.stdlib cimport malloc, free
 cimport c_ssh2
 from session cimport Session
 
+
+# Host format type masks
+LIBSSH2_KNOWNHOST_TYPE_MASK = c_ssh2.LIBSSH2_KNOWNHOST_TYPE_MASK
+LIBSSH2_KNOWNHOST_TYPE_PLAIN = c_ssh2.LIBSSH2_KNOWNHOST_TYPE_PLAIN
+LIBSSH2_KNOWNHOST_TYPE_SHA1 = c_ssh2.LIBSSH2_KNOWNHOST_TYPE_SHA1
+LIBSSH2_KNOWNHOST_TYPE_CUSTOM = c_ssh2.LIBSSH2_KNOWNHOST_TYPE_CUSTOM
+
+# Key format type masks
+LIBSSH2_KNOWNHOST_KEYENC_MASK = c_ssh2.LIBSSH2_KNOWNHOST_KEYENC_MASK
+LIBSSH2_KNOWNHOST_KEYENC_RAW = c_ssh2.LIBSSH2_KNOWNHOST_KEYENC_RAW
+LIBSSH2_KNOWNHOST_KEYENC_BASE64 = c_ssh2.LIBSSH2_KNOWNHOST_KEYENC_BASE64
+
+# Key type masks
+LIBSSH2_KNOWNHOST_KEY_MASK = c_ssh2.LIBSSH2_KNOWNHOST_KEY_MASK
+LIBSSH2_KNOWNHOST_KEY_SHIFT = c_ssh2.LIBSSH2_KNOWNHOST_KEY_SHIFT
+LIBSSH2_KNOWNHOST_KEY_RSA1 = c_ssh2.LIBSSH2_KNOWNHOST_KEY_RSA1
+LIBSSH2_KNOWNHOST_KEY_SSHRSA = c_ssh2.LIBSSH2_KNOWNHOST_KEY_SSHRSA
+LIBSSH2_KNOWNHOST_KEY_SSHDSS = c_ssh2.LIBSSH2_KNOWNHOST_KEY_SSHDSS
+LIBSSH2_KNOWNHOST_KEY_UNKNOWN = c_ssh2.LIBSSH2_KNOWNHOST_KEY_UNKNOWN
+
+
+cdef object PyKnownHost(Session session, c_ssh2.LIBSSH2_KNOWNHOSTS *_ptr):
+    cdef KnownHost known_host = KnownHost(session)
+    known_host._ptr = _ptr
+    return known_host
+
+
 cdef class KnownHostEntry:
 
     def __cinit__(self):
@@ -67,19 +94,41 @@ cdef class KnownHost:
             c_ssh2.libssh2_knownhost_free(self._ptr)
             self._ptr = NULL
 
-    def add(self, host, bytes salt, bytes key, int typemask):
+    def add(self, bytes host, bytes salt, bytes key, int typemask):
+        """Deprecated - use ``self.addc``"""
         raise NotImplementedError
 
-    def addc(self, host, bytes salt, bytes key, comment, int typemask):
+    def addc(self, bytes host not None, bytes salt, bytes key not None, bytes comment, int typemask):
+        """Adds a known host to known hosts collection
+
+        :param host: Host to add key for.
+        :type host: bytes
+        :param salt: Salt used for host hashing if host is hashed. May be
+          `None` if host is in plain text.
+        :type salt: bytes
+        :param key: Key to add.
+        :type key: bytes
+        :param comment: Comment to add for host. Can be `None`.
+        :type comment: bytes
+        :param typemask: Bitmask of one of each from
+          ``ssh2.knownhost.LIBSSH2_KNOWNHOST_TYPE_*``,
+          ``ssh2.knownhost.LIBSSH2_KNOWNHOST_KEYENC_*`` and
+          ``ssh2.knownhost.LIBSSH2_KNOWNHOST_KEY_*`` for example for plain text
+          host, raw key encoding and SSH RSA key type ``type`` would be
+          ``LIBSSH2_KNOWNHOST_TYPE_PLAIN && LIBSSH2_KNOWNHOST_KEYENC_RAW && \\
+            LIBSSH2_KNOWNHOST_KEY_SSHRSA``.
+        """
+        cdef size_t keylen = len(key)
+        cdef size_t comment_len
+        comment_len = len(comment) if comment is not None else 0
+
+    def check(self, bytes host, bytes key, int typemask):
         raise NotImplementedError
 
-    def check(self, host, bytes key, int typemask):
+    def checkp(self, bytes host, int port, bytes key, int typemask):
         raise NotImplementedError
 
-    def checkp(self, host, int port, bytes key, int typemask):
-        raise NotImplementedError
-
-    def delete(self, entry):
+    def delete(self, bytes entry):
         raise NotImplementedError
 
     def readline(self, bytes line,

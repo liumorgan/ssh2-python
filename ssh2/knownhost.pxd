@@ -17,8 +17,12 @@
 cimport c_ssh2
 from session cimport Session
 
+cdef object PyKnownHost(Session session, c_ssh2.LIBSSH2_KNOWNHOSTS *_ptr)
+
+
 cdef class KnownHostEntry:
     cdef c_ssh2.libssh2_knownhost *_store
+
 
 cdef class KnownHost:
     cdef c_ssh2.LIBSSH2_KNOWNHOSTS *_ptr

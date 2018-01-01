@@ -28,6 +28,7 @@ from utils cimport to_bytes, to_str
 from statinfo cimport StatInfo
 IF EMBEDDED_LIB:
     from fileinfo cimport FileInfo
+from knownhost cimport PyKnownHost
 
 cimport c_ssh2
 cimport c_sftp
@@ -581,3 +582,15 @@ cdef class Session:
             return
         b_hash = _hash
         return b_hash
+
+    def knownhost_init(self):
+        """Initialise a collection of known hosts for this session.
+
+        :rtype: :py:class:`ssh2.knownhost.KnownHost`"""
+        cdef c_ssh2.LIBSSH2_KNOWNHOSTS *known_hosts
+        with nogil:
+            known_hosts = c_ssh2.libssh2_knownhost_init(
+                self._session)
+        if known_hosts is NULL:
+            return
+        return PyKnownHost(self, known_hosts)

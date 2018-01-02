@@ -88,15 +88,15 @@ jobs:
         - brew update
       install:
         - brew install libssh2
-        - sudo pip2 install -U delocate twine wheel pip setuptools
-        - pip2 wheel .
+        - pip install -U delocate twine wheel pip setuptools
+        - pip wheel .
       script:
         - delocate-listdeps --all *.whl
         - delocate-wheel -v *.whl
         - delocate-listdeps --all *.whl
         - ls -l *.whl
         - brew uninstall libssh2
-        - pip2 install --user -v *.whl
+        - pip install --user -v *.whl
         - pwd; mkdir temp; cd temp; pwd
         - python -c "from ssh2.session import Session; Session()"
         - cd ..; pwd
